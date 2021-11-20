@@ -37,7 +37,6 @@ m_sf = 200				# averaging for scale factor usually 100...500
 
 #Var
 ser = 0
-send = False
 
 
 k,c = 0, 0     #k,c : char;
@@ -174,7 +173,8 @@ def writeraw():             # write raw data to file (end of line)
 # Var  i   :  word;
     global rawind
     for i in range (0, rawind, 1):   # i  := 0 to rawind-1 do
-        f.write(' {}\n'.format(raw[i]))
+        f.write(' {}'.format(raw[i]))
+    f.write('\n')
     rawind = 0
 
 def skalefactor1():         # result from slow slope measurement
@@ -240,7 +240,7 @@ def read2 (n):              # 254, 251: 2 readings (modes A, B, E)
     else:
         u2 = readADC(k0[1])     # result of 2. conversion, mode B for INL test
     du = u1-0.5*(u2+u2old)
-    f.write(' {:11.3f} {:11.3f} {:11.3f} {:6.0f}'.format(u1, u2, du, adcdiff))
+    f.write(' {:11.3f} {:11.3f} {:13.4f} {:6.0f}'.format(u1, u2, du*sf, adcdiff))
     writeraw()
     if checkscreen():
         print('{} {:11.3f} {:11.3f} {:11.3f} {:13.4f} {:6.0f}{:13.5f}'.format( ru, u1m, u2m, du, sf*avdu, adc1, rms*sf))
@@ -314,91 +314,86 @@ def readda():               # 241: DA-Test 26 chars (mode G)
 def keypress(key):
     global k, ser, ruv
     k = (key).upper()
-    if (k >= 'A') and (k <= 'W'):
+    if ((k >= '0') and (k <= '7')) or ((k >= 'A') and (k <= 'W')):
         ser.write(k.encode("utf-8"))
         print('Sent: ' + k)
-        if (k >= 'P'): ruv = ord(k)-80      # update runup version
+        if (k >= 'P') and (k <= 'W'): ruv = ord(k)-80      # update runup version
 
 def main():                     # main program
-    global k, ser, f, fkom, send
+    global k, ser, f, fkom
 
-    #try:
+    try:
 
-    print('Opening file...')
+        print('Opening file...')
     
-#VAR     fn,kom : string;
-#		fkom_ : Longint;
-    #try:
-    fn = input('Filename ')
-    if fn == '': fn = 'test.txt'
-    kom = input('Kommentar ')
+    #VAR     fn,kom : string;
+    #		fkom_ : Longint;
+        fn = input('Filename ')
+        if fn == '': fn = 'test.txt'
+        kom = input('Kommentar ')
         
-    #with open(fn, 'x') as f:
-    with open(fn, 'a') as f:        # TODO debug only 'x'
-        f.write('# ')
-        writetime(f)
-        f.write('# {}\n'.format(fn))
-        f.write('# {}\n'.format(kom))
+        with open(fn, 'w') as f:
+        #with open(fn, 'a') as f:        # TODO debug only 'x'
+            f.write('# ')
+            writetime(f)
+            f.write('# {}\n'.format(fn))
+            f.write('# {}\n'.format(kom))
         
-        if fn != 't':
-            with open('log_kom.txt', 'a') as fkom:  # extra log file
-                fkom.write('{} {}\n'.format(fn, kom))
-                writetime(fkom)
-        print('Opening COM-Port...')  
+            if fn != 't':
+                with open('log_kom.txt', 'a') as fkom:  # extra log file
+                    fkom.write('{} {}\n'.format(fn, kom))
+                    writetime(fkom)
+            print('Opening COM-Port...')
 
-        ser = serial.Serial(port=serial_port,
-                                baudrate=9600,
-                                bytesize=serial.EIGHTBITS,
-                                parity=serial.PARITY_NONE,
-                                stopbits=serial.STOPBITS_ONE,
-                                #xonxoff=True,
-                                # rtscts=True,
-                                # dsrdtr=True,
-                                #exclusive=False,
-                                timeout=120)
+            ser = serial.Serial(port=serial_port,
+                                    baudrate=9600,
+                                    bytesize=serial.EIGHTBITS,
+                                    parity=serial.PARITY_NONE,
+                                    stopbits=serial.STOPBITS_ONE,
+                                    #xonxoff=True,
+                                    # rtscts=True,
+                                    # dsrdtr=True,
+                                    #exclusive=False,
+                                    timeout=120)
 
-        time.sleep(10E-3)
-        writeStatus()
+            time.sleep(10E-3)
+            writeStatus()
         
-        print('COM-Port opened!\n')
+            print('COM-Port opened!\n')
         
-        ser.write('C'.encode("utf-8"))
-        print('Sent: C')  # call for mode C = AZ mode with ref
-        k = ' '                 # key - space as not send
-        time.sleep(10E-3)
-        writeStatus()
+            ser.write('C'.encode("utf-8"))
+            print('Sent: C')  # call for mode C = AZ mode with ref
+            k = ' '                 # key - space as not send
+            time.sleep(10E-3)
+            writeStatus()
         
-        action = {              # action depending on tag
-            254: read2AE,       # 2 readings (modes A, E)
-            251: read2B,        # 2 readings (mode B)
-            250: read3,         # 3 readings (mode C)
-            253: skalefactor1,  # slope ratio measurement (mode K?)
-            252: skalefactor2,  # ADC skale factor and ouput of slope ratio (mode L)
-            248: read4,         # 4 readings (mode D?)
-            247: read4,         # 4 readings (mode D?)
-            241: readda         # DA-Test 26 chars (mode G)
-        }
+            action = {              # action depending on tag
+                254: read2AE,       # 2 readings (modes A, E)
+                251: read2B,        # 2 readings (mode B)
+                250: read3,         # 3 readings (mode C)
+                253: skalefactor1,  # slope ratio measurement (mode K?)
+                252: skalefactor2,  # ADC skale factor and ouput of slope ratio (mode L)
+                248: read4,         # 4 readings (mode D?)
+                247: read4,         # 4 readings (mode D?)
+                241: readda         # DA-Test 26 chars (mode G)
+            }
 
-        # handle keypresses
-        on_press=keypress
-        t = Thread(target=listen_keyboard, args=(on_press,))
-        t.daemon = True
-        t.start()
+            # handle keypresses
+            on_press=keypress
+            t = Thread(target=listen_keyboard, args=(on_press,))
+            t.daemon = True
+            t.start()
 
-        while (k != 'X'):       # loop to receive & send data
-            rawind = 0          # new package, reset counter for raw data
-            while ord(readcom()) != 255: pass     # wait for sync
-            c = readcom()       # get tag
-            n = ord(c)          # for debuging:   write(n,'  ');
-            action.get(n, lambda: 'Invalid')()         # action depending on tag
+            while (k != 'X'):       # loop to receive & send data
+                rawind = 0          # new package, reset counter for raw data
+                while ord(readcom()) != 255: pass     # wait for sync
+                c = readcom()       # get tag
+                n = ord(c)          # for debuging:   write(n,'  ');
+                action.get(n, lambda: 'Invalid')()         # action depending on tag
 
-    #except Exception as e:
-    #    # TODO
-    #    print('Error filehandling: ' + str(e))    
-
-    #except Exception as e:
-    #    # TODO
-    #    print('Error: ' + str(e))
+    except Exception as e:
+        # TODO
+        print('Error: ' + str(e))
         
 if __name__ == "__main__":
 	main()
