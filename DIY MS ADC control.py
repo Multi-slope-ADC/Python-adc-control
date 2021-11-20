@@ -173,7 +173,7 @@ def writeraw():             # write raw data to file (end of line)
 # Var  i   :  word;
     global rawind
     for i in range (0, rawind, 1):   # i  := 0 to rawind-1 do
-        f.write(' {}'.format(raw[i]))
+        f.write('\t{}'.format(raw[i]))
     f.write('\n')
     rawind = 0
 
@@ -206,7 +206,7 @@ def skalefactor2():         # result of ADC scale factor measurement
     if n5 > 2:              # enough data from adjustK1 ( slow slope)
         u = (sum25 / n25 - sum5 / n5)   # difference of average
         u3 = u / (3*(k1_puls-5)*128)    # calculate slope ratio, include fixed constants
-        f.write('; k1= {:14.6f}\n'.format(u3))
+        f.write('k1=\t{:14.6f}'.format(u3))
         print('## k1 = {:14.6f}'.format(u3), end = '')
         sum5 = 0            # reset sums after use
         sum25 = 0
@@ -227,7 +227,7 @@ def skalefactor2():         # result of ADC scale factor measurement
             sumsf = 0       # reset sum to allow update
             countsf = 0
         if countk > 5:  writeLogK()
-        f.write('; k2= {:13.5f}{:11.3f}{:11.3f}  SF= {:13.5f}\n'.format((u + u2) / 2, u, u2, sf*1000))
+        f.write('\tk2=\t{:13.5f}\t{:11.3f}\t{:11.3f}\tSF=\t{:13.5f}\n'.format((u + u2) / 2, u, u2, sf*1000))
         print(' ## k2 : {:11.3f}{:11.3f}{:3.0f}{:3.0f}{:11.3f}'.format(u, u2, m1, m2, (u + u2) / 2))
     else:
         print(' Problem with ADC data: {:10.0f}{:10.0f}{:10.0f}{:10.0f}\n'.format(m1, m2, sumA, sumB))    # invalid data
@@ -240,7 +240,7 @@ def read2 (n):              # 254, 251: 2 readings (modes A, B, E)
     else:
         u2 = readADC(k0[1])     # result of 2. conversion, mode B for INL test
     du = u1-0.5*(u2+u2old)
-    f.write(' {:11.3f} {:11.3f} {:13.4f} {:6.0f}'.format(u1, u2, du*sf, adcdiff))
+    f.write('{:11.3f}\t{:11.3f}\t{:13.4f}\t{:6.0f}'.format(u1, u2, du*sf, adcdiff))
     writeraw()
     if checkscreen():
         print('{} {:11.3f} {:11.3f} {:11.3f} {:13.4f} {:6.0f}{:13.5f}'.format( ru, u1m, u2m, du, sf*avdu, adc1, rms*sf))
@@ -279,7 +279,7 @@ def read3():                # 250: 3 readings (mode C)
             countsf = countsf + 1   # sum up the first m_sf scale factor readings
     else:
         du = (u1-u2) *sf/ 1000  # approx scale if no valid 7 V
-    f.write(' {:11.3f} {:11.3f} {:11.3f} {:12.4f} {:6.0f}'.format(u1, u2, u3, du*scale, adc1-adc2))
+    f.write('{:11.3f}\t{:11.3f}\t{:11.3f}\t{:13.4f}\t{:6.0f}'.format(u1, u2, u3, du*scale, adc1-adc2))
     writeraw()
     if checkscreen():
         print('{} {:11.3f} {:11.3f} {:11.3f} {:13.4f}{:6.0f} {:13.5f}'.format(ru, u1m, u2m, u3m, avdu*scale, adc1, rms*scale))
@@ -293,7 +293,7 @@ def read4():                # 248, 247: 4 readings (mode D)
     u4 = readADC(k0[ruv])      # result of 4. conversion
     if (abs(u4-u3) > 1000): du = (u2-u3)/(u4-u3)
     else: du = (u2-u3) * sf/1000.0  # approx scale if no valid 7 V
-    f.write(' {:11.3f} {:11.3f} {:11.3f} {:11.3f} {:12.4f} {:6.0f}'.format(u1, u2, u3, u4, du*scale, adc1-adc2))
+    f.write('{:11.3f}\t{:11.3f}\t{:11.3f}\t{:11.3f}\t{:13.4f}\t{:6.0f}'.format(u1, u2, u3, u4, du*scale, adc1-adc2))
     writeraw()
     if checkscreen():
         print('{} {:11.3f} {:11.3f} {:11.3f} {:11.3f} {:13.4f}{:6.0f} {:13.5f}'.format(ru, u1m, u2m, u3m, u4, avdu*scale, adc1, rms*scale))
