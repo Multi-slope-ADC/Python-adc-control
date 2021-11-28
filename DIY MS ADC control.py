@@ -7,6 +7,7 @@ from decimal import *
 from math import *
 from threading import Thread
 from sshkeyboard import listen_keyboard
+from statistics import median
 
 serial_port = 'COM4'	# e.g. /dev/ttyUSB0 on Linux, COM1 on Windows
 m = 10					# output to screen every m results
@@ -37,6 +38,8 @@ m_sf = 200				# averaging for scale factor usually 100...500
 
 #Var
 ser = 0
+setsfstate = -1
+sfvalues = [0 for i in range(m_sf+1)]
 u1old = 0
 
 
@@ -233,6 +236,27 @@ def skalefactor2():         # result of ADC scale factor measurement
     else:
         print(' Problem with ADC data: {:10.0f}{:10.0f}{:10.0f}{:10.0f}\n'.format(m1, m2, sumA, sumB))    # invalid data
 
+def setscalefactor(n):
+    # acal for modes with 2 readings, updates sf
+
+    global setsfstate, sfvalues, sf
+    if n == 254:            # n = action - setsf only for Mode A & E
+        # get m_sf readings of 7V & GNDS
+        if setsfstate == 0:
+            ser.write('6'.encode("utf-8"))
+        if setsfstate >= 1 and setsfstate <= m_sf + 1:
+            sfvalues[setsfstate-1] = u1 - u2
+
+        setsfstate += 1
+
+        if setsfstate > m_sf + 1:                     # setsf finished
+            setsfstate = -1
+            print('update scalefactor from ref reading old: {:13.10f}'.format(sf), end = '')
+            sf = scale/median(sfvalues)
+            print(' new: {:13.10f}'.format(sf))
+
+    else: setsfstate = -1
+
 def read2 (n):              # 254, 251: 2 readings (modes A, B, E)
     global u1, u2, u1old, u2old, f, du
     u1 = readADC(k0[ruv])       # result of 1 st conversion
@@ -324,7 +348,7 @@ def keypress(key):
         if (k >= 'P') and (k <= 'W'): ruv = ord(k)-80      # update runup version
 
 def main():                     # main program
-    global k, ser, f, fkom
+    global k, ser, f, fkom, setsfstate
 
     try:
 
@@ -394,6 +418,11 @@ def main():                     # main program
                 c = readcom()       # get tag
                 n = ord(c)          # for debuging:   write(n,'  ');
                 action.get(n, lambda: 'Invalid')()         # action depending on tag
+                if k == 'Z':        # set scalefactor for 2 reading mode
+                    setsfstate = 0
+                    k = ''
+                    print('starting set scalefactor...')
+                if setsfstate >= 0: setscalefactor(n)
 
     except Exception as e:
         # TODO
