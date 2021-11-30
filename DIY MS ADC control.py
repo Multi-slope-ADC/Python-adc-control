@@ -1,9 +1,8 @@
 #!/usr/bin/python3
 
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 import serial
-from decimal import *
 from math import *
 from threading import Thread
 from sshkeyboard import listen_keyboard
