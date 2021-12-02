@@ -21,8 +21,8 @@ out_mode = 3			# TODO output format (not yet implemented)
 adcclock = 12000000		# clock on ADC board
 scale = 6951.926		# Ref voltage in mV 7106.8384
 xd = 12*3				# extra  delay 3x xdel in ASM code !!! has to match FW !!!
-k1 =  1.0 / 20.962		# measured ref ratios from adjustment
-k2 =  4.0 / 121.5		# fine step / adc LSB
+k1 =  1.0 / 20.9637		# measured ref ratios from adjustment
+k2 =  4.0 / 121.66		# fine step / adc LSB
 
 # Lenght of active run-up phase for different RU mode P,Q,R,S,T,U,V,W, has to match AVR software
 k0 = [51+xd-16, 102+2*xd-24, 102+2*xd-16, 102+2*xd-16, 102+2*xd-16, 102+2*xd-24, 102+2*xd-36, 204+4*xd-24]
