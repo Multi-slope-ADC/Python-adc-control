@@ -10,11 +10,6 @@ from statistics import median
 
 serial_port = 'COM4'	# e.g. /dev/ttyUSB0 on Linux, COM1 on Windows
 m = 10					# output to screen every m results
-out_mode = 3			# TODO output format (not yet implemented)
-						# 0 -> only average of result
-						# 1 -> only average
-						# 2 -> u1,u2,...
-						# 3 -> raw
 
 # constants depending on ADC board (HW and software)
 # TODO UPPERCASE in python 
@@ -260,21 +255,6 @@ def read2 (n):              # 254, 251: 2 readings (modes A, B, E)
     writeraw()
     if checkscreen():
         print('{} {:11.3f} {:11.3f} {:11.3f} {:13.4f} {:6.0f}{:13.5f}'.format( ru, u1m, u2m, du, sf*avdu, adc1, rms*sf))
-    #switch (out_mode) {
-    #    case 3:                 # full data with raw
-    #        write(f,' ',u1:8:3,' ',u2:8:3,' ',du:8:3,' ', adcdiff:6)
-    #        writeraw
-    #        if checkscreen:
-    #            writeln( ru,' ',u1m:8:3,' ',u2m:8:3,' ',du:8:3, ' ', sf*avdu:9:4,' ',adc1:6, rms*sf:8:5)
-    #    case 2:                 # full data without raw
-    #        writeln(f,' ',u1:8:3,' ',u2:8:3,' ',du:8:3,' ', adcdiff:6)
-    #        if checkscreen:
-    #            writeln( ru,' ',u1m:8:3,' ',u2m:8:3,' ',du:8:3, ' ', sf*avdu:9:4,' ',adc1:6, rms*sf:8:5)
-    #    case 1:                 # only average
-    #        if checkscreen:
-    #            writeln( ru,' ',u1m:8:3,' ',u2m:8:3,' ',du:8:3, ' ', sf*avdu:9:4,' ',adc1:6, rms*sf:8:5)
-    #            writeln( f,u1m:8:3,' ',u2m:8:3,' ',du:8:4, ' ', sf*avdu:9:5,' ', rms*sf:8:5)
-    #}
     u1old = u1
     u2old = u2
 
