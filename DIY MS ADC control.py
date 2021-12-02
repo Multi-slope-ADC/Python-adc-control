@@ -314,7 +314,7 @@ def readda():               # TODO 241: DA-Test (mode G)
 def keypress(key):
     global k, ser, ruv
     k = (key).upper()
-    if ((k >= '0') and (k <= '7')) or ((k >= 'A') and (k <= 'W')):
+    if len(k) == 1 and (((k >= '0') and (k <= '7')) or ((k >= 'A') and (k <= 'W'))):
         ser.write(k.encode("utf-8"))
         print('Sent: ' + k)
         if (k >= 'P') and (k <= 'W'): ruv = ord(k)-80      # update runup version
