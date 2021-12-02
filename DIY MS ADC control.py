@@ -387,8 +387,7 @@ def main():                     # main program
             while (k != 'X'):       # loop to receive & send data
                 rawind = 0          # new package, reset counter for raw data
                 while ord(ser.read(1)) != 255: pass     # wait for sync
-                c = ser.read(1)       # get tag
-                n = ord(c)          # for debuging:   write(n,'  ');
+                n = ord(ser.read(1))       # get tag
                 action.get(n, lambda: 'Invalid')()         # action depending on tag
                 if k == 'Z':        # set scalefactor for 2 reading mode
                     setsfstate = 0
