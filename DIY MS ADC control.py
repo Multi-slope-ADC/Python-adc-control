@@ -106,14 +106,10 @@ def writeStatus():
     #print('Device: {} Windows Status: {}\n').format(ser.name, str(ser.is_open))
     print('Device: ' + ser.name + ' Windows Status: ' + str(ser.is_open) + '\n')
 
-def readcom():
-    #print('*')             # for debug
-    return ser.read(1)
-
 def read8():                # read value and remember
 #VAR  k : word;
     global raw, rawind
-    k = ord(readcom())
+    k = ord(ser.read(1))
     raw[rawind] = k         # remember raw values as words
     rawind = rawind +1
     return k
@@ -121,8 +117,8 @@ def read8():                # read value and remember
 def read16():
 #Var       k,k2  : word;
     global raw, rawind
-    k = ord(readcom())        # low byte
-    k2 = ord(readcom())
+    k = ord(ser.read(1))        # low byte
+    k2 = ord(ser.read(1))
     k = 256 * k2 + k
     raw[rawind] = k         # remember raw values as word
     rawind = rawind +1
@@ -131,9 +127,9 @@ def read16():
 def read24():
 #Var       k,k1,k2  :longint;
     global raw, rawind
-    k =ord(readcom())         # low byte
-    k1=ord(readcom())
-    k2=ord(readcom())
+    k =ord(ser.read(1))         # low byte
+    k1=ord(ser.read(1))
+    k2=ord(ser.read(1))
     k = k + 256 * (k1 + 256 * k2)
     raw[rawind] = k         # remember raw values
     rawind = rawind +1
@@ -345,7 +341,7 @@ def readda():               # 241: DA-Test 26 chars (mode G)
     print('DA result: ', end = '')
     das = '0x'
     for n in range (0, 25+1, 1):
-        da[n] = ord(readcom())
+        da[n] = ord(ser.read(1))
         print('{:3d} '.format(da[n]), end = '')
         das = das + hex(da[n])
     print()
@@ -426,8 +422,8 @@ def main():                     # main program
 
             while (k != 'X'):       # loop to receive & send data
                 rawind = 0          # new package, reset counter for raw data
-                while ord(readcom()) != 255: pass     # wait for sync
-                c = readcom()       # get tag
+                while ord(ser.read(1)) != 255: pass     # wait for sync
+                c = ser.read(1)       # get tag
                 n = ord(c)          # for debuging:   write(n,'  ');
                 action.get(n, lambda: 'Invalid')()         # action depending on tag
                 if k == 'Z':        # set scalefactor for 2 reading mode
