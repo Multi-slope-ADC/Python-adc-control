@@ -296,17 +296,20 @@ def read4():                # 248, 247: 4 readings (mode D)
         print('{} {:11.3f} {:11.3f} {:11.3f} {:11.3f} {:13.4f}{:6.0f} {:13.5f}'.format(ru, u1m, u2m, u3m, u4, avdu*scale, adc1, rms*scale))
     u2old = u2
 
-def readda():               # 241: DA-Test 26 chars (mode G)
+def readda():               # TODO 241: DA-Test (mode G)
+# Charge (40.5 µs), wait (uart send nx17 cycles), run-down (uart send 2x2bytes), read ADC wait, read ADC x7, wait ~520µs, read ADC, wait ~780µs, read ADC, wait ~26 ms, read ADC, run-down (uart send 2x2bytes), read ADC wait, wait ~13ms, read ADC, wait ~13ms, read ADC
     global f
-    da = [0 for i in range(25+1)]
+    da = [0 for i in range(34)]
     print('DA result: ', end = '')
     das = '0x'
-    for n in range (0, 25+1, 1):
-        da[n] = ord(ser.read(1))
-        print('{:3d} '.format(da[n]), end = '')
+    for n in range (0, 34, 1):
+        #da[n] = ord(ser.read(1))
+        da[n] = readbytes(2)
+        print('{:4d} '.format(da[n]), end = '')
         das = das + hex(da[n])
     print()
-    f.write(das + '\n')
+    f.write(das)
+    writeraw()
 
 def keypress(key):
     global k, ser, ruv
