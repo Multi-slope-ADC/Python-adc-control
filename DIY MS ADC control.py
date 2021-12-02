@@ -55,17 +55,6 @@ sumk1,sumk2, sumsf = 0, 0, 0    #sumk1,sumk2, sumsf : double;
 countk,countsf = 0, 0   #countk,countsf : integer;
 
 ruv = 1                   # default RU version
-#outcnt = 0
-#sumdu =0
-#sumq =0
-#avdu =0
-#u2old=0
-#rawind = 0
-#sumk1 = 0
-#sumk2 = 0
-#sumsf = 0
-#countk = 0
-#countsf = 0
 sf = sf0                  # crude estimate for scale factor as a start
 
 
@@ -98,8 +87,7 @@ def checkscreen():          # sum up and check if ready for output
 
 
 def writeStatus():
-    #print('Device: {} Windows Status: {}\n').format(ser.name, str(ser.is_open))
-    print('Device: ' + ser.name + ' Windows Status: ' + str(ser.is_open) + '\n')
+    print('Device: ' + ser.name + ' Status: ' + str(ser.is_open) + '\n')
 
 def readbytes(n):                # read value and remember
     global raw, rawind
@@ -127,7 +115,7 @@ def readADC(k_0):           # read one ADC result
     adcalt= adc2            # remember old res. charge (for version with only 1 reading)
     return (k_0 *(ru-ru0)) *(2+k1) + (small - large*(1+k1) + (adcdiff)*k1*k2)
 
-def writetime(f):           # write date an time to file + info on konstants
+def writetime(f):           # write date and time to file + info on konstants
     time = datetime.now(timezone.utc).astimezone(tz=None).replace(tzinfo=None)
     f.write('{:2d}/{:2d} {:2d}:{:2d}'.format(time.month, time.day, time.hour, time.minute))
     f.write(' with k0={}'.format(k0[1]))
@@ -166,8 +154,6 @@ def skalefactor1():         # result from slow slope measurement
         n25 = n25 + 1;
     adcl = readbytes(2)           # dummy read not yet used, not needed
     adcl = readbytes(2)
-    # write(f,n:4);     # type of data
-    # writeraw;         # raw data
 
 def skalefactor2():         # result of ADC scale factor measurement
 #var m1,m2  : integer;
@@ -209,9 +195,9 @@ def skalefactor2():         # result of ADC scale factor measurement
             k2values = list()
 
         if countsf == m_sf:
-            print(' update scalefactor from ref reading old: {:13.5f}'.format(sf), end = '')
+            print(' update scalefactor from ref reading old: {:13.10f}'.format(sf), end = '')
             sf = sumsf / m_sf
-            print(' new: {:13.5f}'.format(sf), end = '')
+            print(' new: {:13.10f}'.format(sf), end = '')
             sumsf = 0       # reset sum to allow update
             countsf = 0
         if countk > 5:  writeLogK()
@@ -220,9 +206,7 @@ def skalefactor2():         # result of ADC scale factor measurement
     else:
         print(' Problem with ADC data: {:10.0f}{:10.0f}{:10.0f}{:10.0f}\n'.format(m1, m2, sumA, sumB))    # invalid data
 
-def setscalefactor(n):
-    # acal for modes with 2 readings, updates sf
-
+def setscalefactor(n):                  # acal for modes with 2 readings, updates sf
     global setsfstate, sfvalues, sf
     if n == 254:            # n = action - setsf only for Mode A & E
         # get m_sf readings of 7V & GNDS
@@ -239,11 +223,13 @@ def setscalefactor(n):
             sf = scale/median(sfvalues)
             print(' new: {:13.10f}'.format(sf))
 
-    else: setsfstate = -1
+    else:
+        setsfstate = -1
+        print('Error: update scalefactor only awailable in mode A & E!')
 
 def read2 (n):              # 254, 251: 2 readings (modes A, B, E)
     global u1, u2, u1old, u2old, f, du
-    u1 = readADC(k0[ruv])       # result of 1 st conversion
+    u1 = readADC(k0[ruv])       # result of 1. conversion
     if n == 254:
         u2 = readADC(k0[ruv])   # result of 2. conversion
         du = u1 - u2
@@ -266,7 +252,7 @@ def read2B():
 
 def read3():                # 250: 3 readings (mode C)
     global u1, u2, u3, u2old, f, du, countsf, sumsf
-    u1 = readADC(k0[ruv])       # result of 1 st conversion
+    u1 = readADC(k0[ruv])       # result of 1. conversion
     u2 = readADC(k0[ruv])       # result of 2. conversion
     u3 = readADC(k0[ruv])       # result of 3. conversion
     if abs(u3-u2) > 1000 :
@@ -284,7 +270,7 @@ def read3():                # 250: 3 readings (mode C)
 
 def read4():                # 248, 247: 4 readings (mode D)
     global u1, u2, u3, u4, u2old, f, du
-    u1 = readADC(k0[ruv])      # result of 1 st conversion
+    u1 = readADC(k0[ruv])      # result of 1. conversion
     u2 = readADC(k0[ruv])      # result of 2. conversion
     u3 = readADC(k0[ruv])      # result of 3. conversion
     u4 = readADC(k0[ruv])      # result of 4. conversion
@@ -320,20 +306,19 @@ def keypress(key):
         if (k >= 'P') and (k <= 'W'): ruv = ord(k)-80      # update runup version
 
 def main():                     # main program
+    #VAR     fn,kom : string;
+    #		fkom_ : Longint;
     global k, ser, f, fkom, setsfstate
 
     try:
 
         print('Opening file...')
     
-    #VAR     fn,kom : string;
-    #		fkom_ : Longint;
         fn = input('Filename ')
         if fn == '': fn = 'test.txt'
         kom = input('Kommentar ')
         
         with open(fn, 'w') as f:
-        #with open(fn, 'a') as f:        # TODO debug only 'x'
             f.write('# ')
             writetime(f)
             f.write('# {}\n'.format(fn))
@@ -361,28 +346,24 @@ def main():                     # main program
         
             print('COM-Port opened!\n')
         
-            ser.write('C'.encode("utf-8"))
-            print('Sent: C')  # call for mode C = AZ mode with ref
-            k = ' '                 # key - space as not send
-            time.sleep(10E-3)
-            writeStatus()
-        
-            action = {              # action depending on tag
-                254: read2AE,       # 2 readings (modes A, E)
-                251: read2B,        # 2 readings (mode B)
-                250: read3,         # 3 readings (mode C)
-                253: skalefactor1,  # slope ratio measurement (mode ?, included in mode L)
-                252: skalefactor2,  # ADC skale factor and ouput of slope ratio (mode L)
-                248: read4,         # 4 readings (mode D?)
-                247: read4,         # 4 readings (mode D?)
-                241: readda         # DA-Test 26 chars (mode G)
-            }
+            keypress('C')           # call for mode C = AZ mode with ref
 
             # handle keypresses
             on_press=keypress
             t = Thread(target=listen_keyboard, args=(on_press,))
             t.daemon = True
             t.start()
+        
+            action = {              # action depending on tag
+                254: read2AE,       # 2 readings (modes A, E)
+                251: read2B,        # 2 readings (mode B)
+                250: read3,         # 3 readings (mode C)
+                248: read4,         # 4 readings (mode D?)
+                247: read4,         # 4 readings (mode D?)
+                241: readda,        # DA-Test (mode G)
+                253: skalefactor1,  # slope ratio measurement (mode ?, included in mode L)
+                252: skalefactor2   # ADC skale factor and output of slope ratio (mode L)
+            }
 
             while (k != 'X'):       # loop to receive & send data
                 rawind = 0          # new package, reset counter for raw data
@@ -392,11 +373,10 @@ def main():                     # main program
                 if k == 'Z':        # set scalefactor for 2 reading mode
                     setsfstate = 0
                     k = ''
-                    print('starting set scalefactor...')
+                    print('starting update scalefactor...')
                 if setsfstate >= 0: setscalefactor(n)
 
     except Exception as e:
-        # TODO
         print('Error: ' + str(e))
         
 if __name__ == "__main__":
