@@ -40,7 +40,8 @@ ser = 0
 setsfstate = -1
 sfvalues = [0 for i in range(m_sf+1)]
 u1old = 0
-
+k1values = list()
+k2values = list()
 
 k,c = 0, 0     #k,c : char;
 n,outcnt,ruv = 0, 0, 0  #n,outcnt,ruv : word;
@@ -198,7 +199,7 @@ def skalefactor1():         # result from slow slope measurement
 
 def skalefactor2():         # result of ADC scale factor measurement
 #var m1,m2  : integer;
-    global adc1, adc2, sum5, sum25, n5, n25, sumk1, sumk2, countk, sumsf, countsf, u, u2, u3, sf
+    global adc1, adc2, sum5, sum25, n5, n25, sumk1, sumk2, countk, sumsf, countsf, u, u2, u3, sf, k1, k2, k1values, k2values
     m1 = read8()            # number of steps up
     m2 = read8()            # number of steps down
     sumA = read16()
@@ -223,6 +224,18 @@ def skalefactor2():         # result of ADC scale factor measurement
         sumk1 = sumk1 + u3
         sumk2 = sumk2 + (u + u2) / 2
         countk = countk + 1
+
+        k1values.append(u3)
+        k2values.append((u + u2) / 2)
+        if len(k1values) >= m_sf:
+            print('\nOld k1 & k2: {:.14f} {:.13f}'.format(k1, k2))
+            k1 =  1.0 / median(k1values)
+            k2 =  4.0 / median(k2values)
+
+            print('New k1 & k2: {:.14f} {:.13f}'.format(k1, k2))
+            k1values = list()
+            k2values = list()
+
         if countsf == m_sf:
             print(' update scalefactor from ref reading old: {:13.5f}'.format(sf), end = '')
             sf = sumsf / m_sf
