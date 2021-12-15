@@ -186,11 +186,11 @@ def skalefactor2():         # result of ADC scale factor measurement
         k1values.append(u3)
         k2values.append((u + u2) / 2)
         if len(k1values) >= m_sf:
-            print('\nOld k1 & k2: {:.14f} {:.13f}'.format(k1, k2))
+            print('\nOld k1 & k2: {:.6f} {:.3f}'.format(1.0 / k1, 4.0 / k2))
             k1 =  1.0 / median(k1values)
             k2 =  4.0 / median(k2values)
 
-            print('New k1 & k2: {:.14f} {:.13f}'.format(k1, k2))
+            print('New k1 & k2: {:.6f} {:.3f}'.format(1.0 / k1, 4.0 / k2))
             k1values = list()
             k2values = list()
 
