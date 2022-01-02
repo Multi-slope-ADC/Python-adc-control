@@ -1,6 +1,15 @@
 # ADC control program (Python)<br>
 Python clone of [adc control program (free pascal) from Ulrich Harms](https://www.eevblog.com/forum/metrology/diy-high-resolution-multi-slope-converter/msg3616117/#msg3616117)<br>
 <br>
+Changelog:<br>
+Logfiles: Values with tab separation<br>
+Mode B (INL test): improved interpolation<br>
+Added set scalefactor for mode A & E - new function Z<br>
+Added update for k1 & k2 values for function "L"<br>
+<br>
+[Clone w/o changes is maintained in branch: Clone_of_Pascal](https://github.com/Multi-slope-ADC/Python-adc-control/tree/Clone_of_Pascal)<br>
+<br>
+## Manual<br>
 Commands are sent as 1 byte ASCII:<br>
 <br>
 0..7 Selection of MUX channel for measurement (Input1..8 on U7 DG408)<br>
@@ -27,16 +36,17 @@ F..M functions:<br>
 &nbsp;K -> old version slope measurement (stops if necessary)<br>
 &nbsp;L -> slope measurement K1 and K2<br>
 &nbsp;M -> double integration time (2, 4, 8, ... PLC)<br>
+&nbsp;Z -> set scalefactor for mode A & E<br>
 <br>
 P..W run-up versions:<br>
-&nbsp;P -> fast 35+3*x/8/8<br>
-&nbsp;Q -> normal case 78+6*x/12/12<br>
-&nbsp;R -> short fix 86+6*x/8/8<br>
+&nbsp;P -> fast 35+3\*x/8/8<br>
+&nbsp;Q -> normal case 78+6\*x/12/12<br>
+&nbsp;R -> short fix 86+6\*x/8/8<br>
 &nbsp;S -> 4 step mode<br>
 &nbsp;T -> dummy 4 step mode (integrator MUX U5 4053 always off)<br>
 &nbsp;U -> 4 step with 0<br>
-&nbsp;V -> long fix 66+6*x/18/18<br>
-&nbsp;W -> slow 168+12*x/18/18<br>
+&nbsp;V -> long fix 66+6\*x/18/18<br>
+&nbsp;W -> slow 168+12\*x/18/18<br>
 <br>
 X -> exit control program (no changes in adc)<br>
 <br>
@@ -58,7 +68,7 @@ K2 gives the scale factor for the µC internal ADC.<br>
 <br>
 The two quantities are measured by sending the command "L" to the ADC.<br>
 The appropriate calibration measurements are then made.<br>
-The values ​​also end up in the file, but are not yet directly adopted for the measurement - they need to be manually set in the program.<br>
+The values ​​also end up in the file and are directly adopted for the measurement, but they can be manually set in the program.<br>
 The notation as 1 / ... and 4 / ... and comes from the fact that the outputs from the program just correspond to the ... values.<br>
 <br>
 At the console the 5th value is the voltage in mV, the 6th value is the raw value of the µC internal ADC.<br>
