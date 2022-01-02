@@ -106,33 +106,14 @@ def writeStatus():
     #print('Device: {} Windows Status: {}\n').format(ser.name, str(ser.is_open))
     print('Device: ' + ser.name + ' Windows Status: ' + str(ser.is_open) + '\n')
 
-def read8():                # read value and remember
-#VAR  k : word;
+def readbytes(n):                # read value and remember
     global raw, rawind
-    k = ord(ser.read(1))
+    bytesread = bytearray(n)
+    count = ser.readinto(bytesread)
+    if count != n: print('ERROR: Wanted to read {} bytes, but read {} bytes instead'.format(n, count))  #TODO raise exception
+    k = int.from_bytes(bytesread, byteorder='little', signed=False)
     raw[rawind] = k         # remember raw values as words
-    rawind = rawind +1
-    return k
-
-def read16():
-#Var       k,k2  : word;
-    global raw, rawind
-    k = ord(ser.read(1))        # low byte
-    k2 = ord(ser.read(1))
-    k = 256 * k2 + k
-    raw[rawind] = k         # remember raw values as word
-    rawind = rawind +1
-    return k
-
-def read24():
-#Var       k,k1,k2  :longint;
-    global raw, rawind
-    k =ord(ser.read(1))         # low byte
-    k1=ord(ser.read(1))
-    k2=ord(ser.read(1))
-    k = k + 256 * (k1 + 256 * k2)
-    raw[rawind] = k         # remember raw values
-    rawind = rawind +1
+    rawind += 1
     return k
 
 def readADC(k_0):           # read one ADC result
@@ -140,12 +121,12 @@ def readADC(k_0):           # read one ADC result
                             # result is in cycles of small (negative) reference
 #var  small, large, ru0 :longint
     global ru, adc1, adc2, adcdiff, adcalt
-    ru = read16()             # run-up counts
-    small = read16()          # cycles of weaker ref (negative)
-    large = read16()          # cycles of stronger ref (pos)
-    adc1 = read16()           # aux ADC , average integrator voltage, for info only
-    adc1 = read16()           # residual charge after conversion
-    adc2 = read16()           # residual charge before conversion
+    ru = readbytes(2)             # run-up counts
+    small = readbytes(2)          # cycles of weaker ref (negative)
+    large = readbytes(2)          # cycles of stronger ref (pos)
+    adc1 = readbytes(2)           # aux ADC , average integrator voltage, for info only
+    adc1 = readbytes(2)           # residual charge after conversion
+    adc2 = readbytes(2)           # residual charge before conversion
     adcdiff = adc2-adc1
     ru0 = round(adcclock *0.02 / (k_0+16) / 2)  # approximate zero : length K_o+16 is not accurate
     adcalt= adc2            # remember old res. charge (for version with only 1 reading)
@@ -180,28 +161,28 @@ def writeraw():             # write raw data to file (end of line)
 def skalefactor1():         # result from slow slope measurement
 #var  pulseL, adcl : integer;  # sums are global
     global sum, sum5, n5, sum25, n25
-    sum = read24()          # sum of slow slope lenght
-    pulseL = read8()        # pulse length
+    sum = readbytes(3)          # sum of slow slope lenght
+    pulseL = readbytes(1)        # pulse length
     if pulseL == 5:         # sum up data for short
        sum5 = sum5 + sum;
        n5 = n5 + 1;
     if pulseL == k1_puls:   # long case
         sum25 = sum25 + sum;
         n25 = n25 + 1;
-    adcl = read16()           # dummy read not yet used, not needed
-    adcl = read16()
+    adcl = readbytes(2)           # dummy read not yet used, not needed
+    adcl = readbytes(2)
     # write(f,n:4);     # type of data
     # writeraw;         # raw data
 
 def skalefactor2():         # result of ADC scale factor measurement
 #var m1,m2  : integer;
     global adc1, adc2, sum5, sum25, n5, n25, sumk1, sumk2, countk, sumsf, countsf, u, u2, u3, sf, k1, k2, k1values, k2values
-    m1 = read8()            # number of steps up
-    m2 = read8()            # number of steps down
-    sumA = read16()
-    sumB = read16()
-    adc1 = read16()         # for debug only, but need to read !
-    adc2 = read16()
+    m1 = readbytes(1)            # number of steps up
+    m2 = readbytes(1)            # number of steps down
+    sumA = readbytes(2)
+    sumB = readbytes(2)
+    adc1 = readbytes(2)         # for debug only, but need to read !
+    adc2 = readbytes(2)
     writeraw()
     if n5 > 2:              # enough data from adjustK1 ( slow slope)
         u = (sum25 / n25 - sum5 / n5)   # difference of average
