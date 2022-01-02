@@ -411,7 +411,7 @@ def main():                     # main program
                 254: read2AE,       # 2 readings (modes A, E)
                 251: read2B,        # 2 readings (mode B)
                 250: read3,         # 3 readings (mode C)
-                253: skalefactor1,  # slope ratio measurement (mode K?)
+                253: skalefactor1,  # slope ratio measurement (mode ?, included in mode L)
                 252: skalefactor2,  # ADC skale factor and ouput of slope ratio (mode L)
                 248: read4,         # 4 readings (mode D?)
                 247: read4,         # 4 readings (mode D?)
