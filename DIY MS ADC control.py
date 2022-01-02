@@ -37,6 +37,7 @@ m_sf = 200				# averaging for scale factor usually 100...500
 
 #Var
 ser = 0
+u1old = 0
 
 
 k,c = 0, 0     #k,c : char;
@@ -233,13 +234,15 @@ def skalefactor2():         # result of ADC scale factor measurement
         print(' Problem with ADC data: {:10.0f}{:10.0f}{:10.0f}{:10.0f}\n'.format(m1, m2, sumA, sumB))    # invalid data
 
 def read2 (n):              # 254, 251: 2 readings (modes A, B, E)
-    global u1, u2, u2old, f, du
+    global u1, u2, u1old, u2old, f, du
     u1 = readADC(k0[ruv])       # result of 1 st conversion
     if n == 254:
         u2 = readADC(k0[ruv])   # result of 2. conversion
+        du = u1 - u2
     else:
         u2 = readADC(k0[1])     # result of 2. conversion, mode B for INL test
-    du = u1-0.5*(u2+u2old)
+        du = (3*(u2old-u1)-u1old+u2)/4   # interpolate both values
+
     f.write('{:11.3f}\t{:11.3f}\t{:13.4f}\t{:6.0f}'.format(u1, u2, du*sf, adcdiff))
     writeraw()
     if checkscreen():
@@ -259,6 +262,7 @@ def read2 (n):              # 254, 251: 2 readings (modes A, B, E)
     #            writeln( ru,' ',u1m:8:3,' ',u2m:8:3,' ',du:8:3, ' ', sf*avdu:9:4,' ',adc1:6, rms*sf:8:5)
     #            writeln( f,u1m:8:3,' ',u2m:8:3,' ',du:8:4, ' ', sf*avdu:9:5,' ', rms*sf:8:5)
     #}
+    u1old = u1
     u2old = u2
 
 def read2AE():
