@@ -133,9 +133,10 @@ def writeLogK():
 def writeraw():             # write raw data to file (end of line)
 # Var  i   :  word;
     global rawind
-    for i in range (0, rawind, 1):   # i  := 0 to rawind-1 do
-        f.write('\t{}'.format(raw[i]))
-    f.write('\n')
+    #for i in range (0, rawind, 1):   # i  := 0 to rawind-1 do
+    #    #f.write(' {}'.format(raw[i]))
+    #    f.write('\t{}'.format(raw[i]))
+    #f.write('\n')
     rawind = 0
 
 def skalefactor1():         # result from slow slope measurement
@@ -165,7 +166,7 @@ def skalefactor2():         # result of ADC scale factor measurement
     if n5 > 2:              # enough data from adjustK1 ( slow slope)
         u = (sum25 / n25 - sum5 / n5)   # difference of average
         u3 = u / (3*(k1_puls-5)*128)    # calculate slope ratio, include fixed constants
-        f.write('k1=\t{:14.6f}'.format(u3))
+        #f.write('k1=\t{:14.6f}'.format(u3))
         print('## k1 = {:14.6f}'.format(u3), end = '')
         sum5 = 0            # reset sums after use
         sum25 = 0
@@ -198,7 +199,7 @@ def skalefactor2():         # result of ADC scale factor measurement
             sumsf = 0       # reset sum to allow update
             countsf = 0
         if countk > 5:  writeLogK()
-        f.write('\tk2=\t{:13.5f}\t{:11.3f}\t{:11.3f}\tSF=\t{:13.5f}\n'.format((u + u2) / 2, u, u2, sf*1000))
+        #f.write('\tk2=\t{:13.5f}\t{:11.3f}\t{:11.3f}\tSF=\t{:13.5f}\n'.format((u + u2) / 2, u, u2, sf*1000))
         print(' ## k2 : {:11.3f}{:11.3f}{:3.0f}{:3.0f}{:11.3f}'.format(u, u2, m1, m2, (u + u2) / 2))
     else:
         print(' Problem with ADC data: {:10.0f}{:10.0f}{:10.0f}{:10.0f}\n'.format(m1, m2, sumA, sumB))    # invalid data
@@ -234,7 +235,7 @@ def read2 (n):              # 254, 251: 2 readings (modes A, B, E)
         u2 = readADC(k0[1])     # result of 2. conversion, mode B for INL test
         du = (3*(u2old-u1)-u1old+u2)/4   # interpolate both values
 
-    f.write('{:11.3f}\t{:11.3f}\t{:13.4f}\t{:6.0f}'.format(u1, u2, du*sf, adcdiff))
+    #f.write('{:11.3f}\t{:11.3f}\t{:13.4f}\t{:6.0f}'.format(u1, u2, du*sf, adcdiff))
     writeraw()
     if checkscreen():
         print('{} {:11.3f} {:11.3f} {:11.3f} {:13.4f} {:6.0f}{:13.5f}'.format( ru, u1m, u2m, du, sf*avdu, adc1, rms*sf))
@@ -260,7 +261,7 @@ def read3():                # 250: 3 readings (mode C)
             countsf = countsf + 1   # sum up the first m_sf scale factor readings
     else:
         du = (u1-u2) *sf/ 1000  # approx scale if no valid 7 V
-    f.write('{:11.3f}\t{:11.3f}\t{:11.3f}\t{:13.4f}\t{:6.0f}'.format(u1, u2, u3, du*scale, adc1-adc2))
+    #f.write('{:11.3f}\t{:11.3f}\t{:11.3f}\t{:13.4f}\t{:6.0f}'.format(u1, u2, u3, du*scale, adc1-adc2))
     writeraw()
     if checkscreen():
         print('{} {:11.3f} {:11.3f} {:11.3f} {:13.4f}{:6.0f} {:13.5f}'.format(ru, u1m, u2m, u3m, avdu*scale, adc1, rms*scale))
@@ -275,7 +276,7 @@ def read4():                # 248, 247: 4 readings (mode D)
     u4 = readADC(k0[ruv])      # result of 4. conversion
     if (abs(u4-u3) > 1000): du = (u2-u3)/(u4-u3)
     else: du = (u2-u3) * sf/1000.0  # approx scale if no valid 7 V
-    f.write('{:11.3f}\t{:11.3f}\t{:11.3f}\t{:11.3f}\t{:13.4f}\t{:6.0f}'.format(u1, u2, u3, u4, du*scale, adc1-adc2))
+    #f.write('{:11.3f}\t{:11.3f}\t{:11.3f}\t{:11.3f}\t{:13.4f}\t{:6.0f}'.format(u1, u2, u3, u4, du*scale, adc1-adc2))
     writeraw()
     if checkscreen():
         print('{} {:11.3f} {:11.3f} {:11.3f} {:11.3f} {:13.4f}{:6.0f} {:13.5f}'.format(ru, u1m, u2m, u3m, u4, avdu*scale, adc1, rms*scale))
@@ -293,7 +294,7 @@ def readda():               # TODO 241: DA-Test (mode G)
         print('{:4d} '.format(da[n]), end = '')
         das = das + hex(da[n])
     print()
-    f.write(das)
+    #f.write(das)
     writeraw()
 
 def keypress(key):
@@ -327,60 +328,258 @@ def main():                     # main program
     #		fkom_ : Longint;
     global k, ser, f, fkom, setsfstate
 
-    try:
+    #try:
 
-        print('Opening file...')
+    print('Opening file...')
     
-        fn = input('Filename ')
-        if fn == '': fn = 'test.txt'
-        kom = input('Kommentar ')
+    #fn = input('Filename ')
+    #if fn == '': fn = 'test.txt'
+    #kom = input('Kommentar ')
+
+    # TODO new directory for each run
+ 
+    print('Opening COM-Port...')
+
+    ser = serial.Serial(port=serial_port,
+                            baudrate=9600,
+                            bytesize=serial.EIGHTBITS,
+                            parity=serial.PARITY_NONE,
+                            stopbits=serial.STOPBITS_ONE,
+                            #xonxoff=True,
+                            # rtscts=True,
+                            # dsrdtr=True,
+                            #exclusive=False,
+                            timeout=120)
+
+    writeStatus()
         
-        with open(fn, 'w') as f:
+    print('COM-Port opened!\n')
+        
+    desc = 'delayed effect 0V & -7Vext'    # Datafile
+    runups = ['Q', 'W', 'P']            # run-up versions as char
+    inputs = ['7', '0']                 # inputs as char
+    fw = ['delayed mux', 'B same ru']                 # Firmware version details
+    kom = ''                # Description
+
+    # handle keypresses
+    on_press=keypress
+    t = Thread(target=listen_keyboard, args=(on_press,))
+    t.daemon = True
+    t.start()
+
+    for runup in runups:
+        fn = f"{desc} - mode A, ru {runup}, inputs {', '.join(inputs)} - FW {', '.join(fw)}.csv" #{datetime.now().astimezone().replace(microsecond=0).replace(':', '').replace('-', '')}
+
+        with open('log_kom.txt', 'a') as fkom:  # extra log file
+            fkom.write('{} {}\n'.format(fn, kom))
+            writetime(fkom)
+
+        with open(fn, 'x') as f:
             f.write('# ')
             writetime(f)
             f.write('# {}\n'.format(fn))
             f.write('# {}\n'.format(kom))
-        
-            if fn != 't':
-                with open('log_kom.txt', 'a') as fkom:  # extra log file
-                    fkom.write('{} {}\n'.format(fn, kom))
-                    writetime(fkom)
-            print('Opening COM-Port...')
+         
+            keypress(inputs[0])     # call for input#
+            time.sleep(100E-3)
+            keypress('B')           # call for mode B
+            time.sleep(100E-3)
+            keypress(runup)           # call for run-up mode
 
-            ser = serial.Serial(port=serial_port,
-                                    baudrate=9600,
-                                    bytesize=serial.EIGHTBITS,
-                                    parity=serial.PARITY_NONE,
-                                    stopbits=serial.STOPBITS_ONE,
-                                    #xonxoff=True,
-                                    # rtscts=True,
-                                    # dsrdtr=True,
-                                    #exclusive=False,
-                                    timeout=120)
+            k = ''                  # reset key
 
-            time.sleep(10E-3)
-            writeStatus()
-        
-            print('COM-Port opened!\n')
-        
-            keypress('C')           # call for mode C = AZ mode with ref
+            time.sleep(200E-3)
 
-            # handle keypresses
-            on_press=keypress
-            t = Thread(target=listen_keyboard, args=(on_press,))
-            t.daemon = True
-            t.start()
+            values = list()
         
-            while (k != 'X'):       # loop to receive & send data
-                read()
-                if k == 'Z':        # set scalefactor for 2 reading mode
-                    setsfstate = 0
-                    k = ''
-                    print('starting update scalefactor...')
-                if setsfstate >= 0: setscalefactor(n)
+            def readntimes(n, key):
+                for l2 in range (0, n):
+                    if l2 == n-1: keypress(key)
+                    actionresult = read()
+                    #print('Key: ' + k)
+                    #if l1 >= start:
+                    if actionresult != 'Invalid':
+                        values.append([k, 2*l2+1, actionresult[0]])
+                        values.append([k, 2*l2+2, actionresult[1]])
+                    else: print('Invalid')
 
-    except Exception as e:
-        print('Error: ' + str(e))
+    # get typical values
+            count = 400
+            key = inputs[1]                   # 
+
+            ser.flushInput()              # discard serial buffer .read_all
+            readntimes(count, key)
+            median0V = median([t[2] for t in values])
+
+            values = list()         #reset values list
+            #key = '7'
+            readntimes(count, key)
+            median7V = median([t[2] for t in values])
+
+            properscaleµV = (scale*1000)/(median7V - median0V) * ((median7V > 0) - (median7V < 0))  # (median7V > 0) - (median7V < 0) gives sign of median7V
+            print(str(properscaleµV))
+        
+            values = list()         #reset values list
+            k = ''                  # reset key
+
+            # mode A run-up (2 readings AZ-mode)
+            keypress(inputs[1])           # call for input
+            time.sleep(100E-3)
+            keypress('A')           # call for mode A (AZ mode)
+            time.sleep(100E-3)
+            keypress(runup)           # call for run-up mode
+
+            k = ''                  # reset key
+            #time.sleep(1)           # wait to settle
+
+            for l1 in range (1000):
+                actionresult = read()
+                if actionresult != 'Invalid':
+                    values.append(['0', 1, actionresult[0]])
+                    values.append(['7', 1, actionresult[1]])
+                else: print('Invalid')
+        
+            # write values to file in convenient way
+            prevvalue = values[0]
+            count = 0
+            prevkey = ''
+            prevprevkey = ''
+            key = ''
+            valuescorrect = list()
+            for val in values:
+
+                if abs(prevvalue[2] - val[2]) > 10:          # new key
+                    count = 1
+                    key = prevprevkey
+                if key != '':
+                    valuescorrect.append([key, count, val[2]])
+                    f.write('{}\t{:3d}\t{:11.3f}\n'.format(key, count, (val[2]-median0V)*properscaleµV))
+                    count += 1
+                prevprevkey = prevkey
+                prevkey = val[0]
+                prevvalue = val
+
+
+        
+    for runup in runups:
+        fn = f"{desc} - mode B, ru {runup}, inputs {', '.join(inputs)} - FW {', '.join(fw)}.csv" #{datetime.now().astimezone().replace(microsecond=0).replace(':', '').replace('-', '')}
+
+        with open('log_kom.txt', 'a') as fkom:  # extra log file
+            fkom.write('{} {}\n'.format(fn, kom))
+            writetime(fkom)
+
+        with open(fn, 'x') as f:
+            f.write('# ')
+            writetime(f)
+            f.write('# {}\n'.format(fn))
+            f.write('# {}\n'.format(kom))
+         
+            keypress(inputs[0])     # call for input#
+            time.sleep(100E-3)
+            keypress('B')           # call for mode B
+            time.sleep(100E-3)
+            keypress(runup)           # call for run-up mode
+
+            k = ''                  # reset key
+
+            time.sleep(200E-3)
+
+            values = list()
+        
+            def readntimes(n, key):
+                for l2 in range (0, n):
+                    if l2 == n-1: keypress(key)
+                    actionresult = read()
+                    #print('Key: ' + k)
+                    #if l1 >= start:
+                    if actionresult != 'Invalid':
+                        values.append([k, 2*l2+1, actionresult[0]])
+                        values.append([k, 2*l2+2, actionresult[1]])
+                    else: print('Invalid')
+
+    # get typical values
+            count = 400
+            key = inputs[1]                   # 
+
+            ser.flushInput()              # discard serial buffer .read_all
+            readntimes(count, key)
+            median0V = median([t[2] for t in values])
+
+            values = list()         #reset values list
+            #key = '7'
+            readntimes(count, key)
+            median7V = median([t[2] for t in values])
+
+            properscaleµV = (scale*1000)/(median7V - median0V) * ((median7V > 0) - (median7V < 0))  # (median7V > 0) - (median7V < 0) gives sign of median7V
+            print(str(properscaleµV))
+        
+            values = list()         #reset values list
+            k = ''                  # reset key
+
+            # delayed/settling effects - mode B
+            ser.flushInput()              # discard serial buffer .read_all
+            for l1 in range (100):
+                count = 10          # count for other key 10 to settle = 20 readings
+                start = 1
+                key = inputs[1]           # key for other reading
+                readntimes(count, key)
+
+                count = 10          # count for other key
+                key = inputs[0]           # key for other reading
+                readntimes(count, key)
+        
+            # write values to file in convenient way
+            prevvalue = values[0]
+            count = 0
+            prevkey = ''
+            prevprevkey = ''
+            key = ''
+            valuescorrect = list()
+            for val in values:
+
+                if abs(prevvalue[2] - val[2]) > 10:          # new key
+                    count = 1
+                    key = prevprevkey
+                if key != '':
+                    valuescorrect.append([key, count, val[2]])
+                    f.write('{}\t{:3d}\t{:11.3f}\n'.format(key, count, (val[2]-median0V)*properscaleµV))
+                    count += 1
+                prevprevkey = prevkey
+                prevkey = val[0]
+                prevvalue = val
+
+
+
+        #median7 = median([t[2] for t in values if t[0] == '7'])
+        #median6 = median([t[2] for t in values if t[0] == '6'])
+        
+        #diff = abs(median7 - median6)
+
+        keypress('7')           # always end with 0V
+        
+        #print ('Median 7: ' + str(median7) + ' Median 6: ' + str(median6))
+        #while (k != 'X'):       # loop to receive & send data
+        #    rawind = 0          # new package, reset counter for raw data
+        #    while ord(readcom()) != 255: pass     # wait for sync
+        #    c = readcom()       # get tag
+        #    n = ord(c)          # for debuging:   write(n,'  ');
+        #    actionresult = action.get(n, lambda: 'Invalid')()         # action depending on tag
+
+        #    if actionresult != 'Invalid': f.write('{:11.3f}\n{:11.3f}\n'.format(actionresult[0], actionresult[1]))
+
+            #while (k != 'X'):       # loop to receive & send data
+            #    rawind = 0          # new package, reset counter for raw data
+            #    while ord(ser.read(1)) != 255: pass     # wait for sync
+            #    n = ord(ser.read(1))       # get tag
+            #    action.get(n, lambda: 'Invalid')()         # action depending on tag
+            #    if k == 'Z':        # set scalefactor for 2 reading mode
+            #        setsfstate = 0
+            #        k = ''
+            #        print('starting update scalefactor...')
+            #    if setsfstate >= 0: setscalefactor(n)
+
+    #except Exception as e:
+    #    print('Error: ' + str(e))
         
 if __name__ == "__main__":
 	main()
