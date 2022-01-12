@@ -243,12 +243,13 @@ def read2 (n):              # 254, 251: 2 readings (modes A, B, E)
         print('{} {:11.3f} {:11.3f} {:11.3f} {:13.4f} {:6.0f}{:13.5f}'.format( ru, u1m, u2m, du, sf*avdu, adc1, rms*sf))
     u1old = u1
     u2old = u2
+    return [u1, u2, du, sf, adcdiff]
 
 def read2AE():
-    read2(254)
+    return read2(254)
 
 def read2B():
-    read2(251)
+    return read2(251)
 
 def read3():                # 250: 3 readings (mode C)
     global u1, u2, u3, u2old, f, du, countsf, sumsf
@@ -267,6 +268,7 @@ def read3():                # 250: 3 readings (mode C)
     if checkscreen():
         print('{} {:11.3f} {:11.3f} {:11.3f} {:13.4f}{:6.0f} {:13.5f}'.format(ru, u1m, u2m, u3m, avdu*scale, adc1, rms*scale))
     u2old = u2
+    return [u1, u2, u3, du, scale, adc1-adc2]
 
 def read4():                # 248, 247: 4 readings (mode D)
     global u1, u2, u3, u4, u2old, f, du
