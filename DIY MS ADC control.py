@@ -117,11 +117,8 @@ def readADC(k_0):           # read one ADC result
 
 def writetime(f):           # write date and time to file + info on konstants
     time = datetime.now(timezone.utc).astimezone(tz=None).replace(tzinfo=None)
-    f.write('{:2d}/{:2d} {:2d}:{:2d}'.format(time.month, time.day, time.hour, time.minute))
-    f.write(' with k0={}'.format(k0[1]))
-    f.write(' k1={:10.4f}'.format(1/k1))
-    f.write(' k2={:8.2f}\n'.format(4/k2))
-
+    f.write(str(datetime.now().astimezone().replace(microsecond=0)))
+    f.write(f' with k0={k0[1]} k1={1/k1:10.4f} k2={4/k2:8.2f} scale={scale}\n'.format())
 
 def writeLogK():
 #VAR  fkom : text;
