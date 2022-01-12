@@ -305,6 +305,13 @@ def keypress(key):
         print('Sent: ' + k)
         if (k >= 'P') and (k <= 'W'): ruv = ord(k)-80      # update runup version
         
+def read():
+    global n
+    rawind = 0          # new package, reset counter for raw data
+    while ord(ser.read(1)) != 255: pass     # wait for sync
+    n = ord(ser.read(1))       # get tag
+    return action.get(n, lambda: 'Invalid')()         # action depending on tag
+
 action = {              # action depending on tag
     254: read2AE,       # 2 readings (modes A, E)
     251: read2B,        # 2 readings (mode B)
@@ -366,10 +373,7 @@ def main():                     # main program
             t.start()
         
             while (k != 'X'):       # loop to receive & send data
-                rawind = 0          # new package, reset counter for raw data
-                while ord(ser.read(1)) != 255: pass     # wait for sync
-                n = ord(ser.read(1))       # get tag
-                action.get(n, lambda: 'Invalid')()         # action depending on tag
+                read()
                 if k == 'Z':        # set scalefactor for 2 reading mode
                     setsfstate = 0
                     k = ''
