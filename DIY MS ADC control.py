@@ -304,6 +304,17 @@ def keypress(key):
         ser.write(k.encode("utf-8"))
         print('Sent: ' + k)
         if (k >= 'P') and (k <= 'W'): ruv = ord(k)-80      # update runup version
+        
+action = {              # action depending on tag
+    254: read2AE,       # 2 readings (modes A, E)
+    251: read2B,        # 2 readings (mode B)
+    250: read3,         # 3 readings (mode C)
+    253: skalefactor1,  # slope ratio measurement (mode ?, included in mode L)
+    252: skalefactor2,  # ADC skale factor and ouput of slope ratio (mode L)
+    248: read4,         # 4 readings (mode D?)
+    247: read4,         # 4 readings (mode D?)
+    241: readda         # DA-Test 26 chars (mode G)
+}
 
 def main():                     # main program
     #VAR     fn,kom : string;
@@ -354,17 +365,6 @@ def main():                     # main program
             t.daemon = True
             t.start()
         
-            action = {              # action depending on tag
-                254: read2AE,       # 2 readings (modes A, E)
-                251: read2B,        # 2 readings (mode B)
-                250: read3,         # 3 readings (mode C)
-                248: read4,         # 4 readings (mode D?)
-                247: read4,         # 4 readings (mode D?)
-                241: readda,        # DA-Test (mode G)
-                253: skalefactor1,  # slope ratio measurement (mode ?, included in mode L)
-                252: skalefactor2   # ADC skale factor and output of slope ratio (mode L)
-            }
-
             while (k != 'X'):       # loop to receive & send data
                 rawind = 0          # new package, reset counter for raw data
                 while ord(ser.read(1)) != 255: pass     # wait for sync
