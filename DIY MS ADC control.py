@@ -20,6 +20,9 @@ class ADC:
     xd = 12*3				# extra  delay 3x xdel in ASM code !!! has to match FW !!!
     k1 =  1.0 / 20.9637		# measured ref ratios from adjustment
     k2 =  4.0 / 121.66		# fine step / adc LSB
+
+    def fwrite(string):
+        ADC.f.write(string)
     # __init__ until here
 
 
@@ -138,8 +141,8 @@ class ADC:
     # Var  i   :  word;
         #global rawind
         for i in range (0, ADC.rawind, 1):   # i  := 0 to rawind-1 do
-            ADC.f.write('\t{}'.format(ADC.raw[i]))
-        ADC.f.write('\n')
+            ADC.fwrite('\t{}'.format(ADC.raw[i]))
+        ADC.fwrite('\n')
         ADC.rawind = 0
 
     def skalefactor1():         # result from slow slope measurement
@@ -169,7 +172,7 @@ class ADC:
         if ADC.n5 > 2:              # enough data from adjustK1 ( slow slope)
             ADC.u = (ADC.sum25 / ADC.n25 - ADC.sum5 / ADC.n5)   # difference of average
             ADC.u3 = ADC.u / (3*(ADC.k1_puls-5)*128)    # calculate slope ratio, include fixed constants
-            ADC.f.write('k1=\t{:14.6f}'.format(ADC.u3))
+            ADC.fwrite('k1=\t{:14.6f}'.format(ADC.u3))
             print('## k1 = {:14.6f}'.format(ADC.u3), end = '')
             ADC.sum5 = 0            # reset sums after use
             ADC.sum25 = 0
@@ -202,7 +205,7 @@ class ADC:
                 ADC.sumsf = 0       # reset sum to allow update
                 ADC.countsf = 0
             if ADC.countk > 5:  ADC.writeLogK()
-            ADC.f.write('\tk2=\t{:13.5f}\t{:11.3f}\t{:11.3f}\tSF=\t{:13.5f}\n'.format((ADC.u + ADC.u2) / 2, ADC.u, ADC.u2, ADC.sf*1000))
+            ADC.fwrite('\tk2=\t{:13.5f}\t{:11.3f}\t{:11.3f}\tSF=\t{:13.5f}\n'.format((ADC.u + ADC.u2) / 2, ADC.u, ADC.u2, ADC.sf*1000))
             print(' ## k2 : {:11.3f}{:11.3f}{:3.0f}{:3.0f}{:11.3f}'.format(ADC.u, ADC.u2, m1, m2, (ADC.u + ADC.u2) / 2))
         else:
             print(' Problem with ADC data: {:10.0f}{:10.0f}{:10.0f}{:10.0f}\n'.format(m1, m2, ADC.sumA, ADC.sumB))    # invalid data
@@ -238,7 +241,7 @@ class ADC:
             ADC.u2 = ADC.readADC(ADC.k0[1])     # result of 2. conversion, mode B for INL test
             ADC.du = (3*(ADC.u2old-ADC.u1)-ADC.u1old+ADC.u2)/4   # interpolate both values
 
-        ADC.f.write('{:11.3f}\t{:11.3f}\t{:13.4f}\t{:6.0f}'.format(ADC.u1, ADC.u2, ADC.du*ADC.sf, ADC.adcdiff))
+        ADC.fwrite('{:11.3f}\t{:11.3f}\t{:13.4f}\t{:6.0f}'.format(ADC.u1, ADC.u2, ADC.du*ADC.sf, ADC.adcdiff))
         ADC.writeraw()
         if ADC.checkscreen():
             print('{} {:11.3f} {:11.3f} {:11.3f} {:13.4f} {:6.0f}{:13.5f}'.format( ADC.ru, ADC.u1m, ADC.u2m, ADC.du, ADC.sf*ADC.avdu, ADC.adc1, ADC.rms*ADC.sf))
@@ -264,7 +267,7 @@ class ADC:
                 ADC.countsf = ADC.countsf + 1   # sum up the first m_sf scale factor readings
         else:
             ADC.du = (ADC.u1-ADC.u2) *ADC.sf/ 1000  # approx scale if no valid 7 V
-        ADC.f.write('{:11.3f}\t{:11.3f}\t{:11.3f}\t{:13.4f}\t{:6.0f}'.format(ADC.u1, ADC.u2, ADC.u3, ADC.du*ADC.scale, ADC.adc1-ADC.adc2))
+        ADC.fwrite('{:11.3f}\t{:11.3f}\t{:11.3f}\t{:13.4f}\t{:6.0f}'.format(ADC.u1, ADC.u2, ADC.u3, ADC.du*ADC.scale, ADC.adc1-ADC.adc2))
         ADC.writeraw()
         if ADC.checkscreen():
             print('{} {:11.3f} {:11.3f} {:11.3f} {:13.4f}{:6.0f} {:13.5f}'.format(ADC.ru, ADC.u1m, ADC.u2m, ADC.u3m, ADC.avdu*ADC.scale, ADC.adc1, ADC.rms*ADC.scale))
@@ -279,7 +282,7 @@ class ADC:
         ADC.u4 = ADC.readADC(ADC.k0[ADC.ruv])      # result of 4. conversion
         if (abs(ADC.u4-ADC.u3) > 1000): ADC.du = (ADC.u2-ADC.u3)/(ADC.u4-ADC.u3)
         else: ADC.du = (ADC.u2-ADC.u3) * ADC.sf/1000.0  # approx scale if no valid 7 V
-        ADC.f.write('{:11.3f}\t{:11.3f}\t{:11.3f}\t{:11.3f}\t{:13.4f}\t{:6.0f}'.format(ADC.u1, ADC.u2, ADC.u3, ADC.u4, ADC.du*ADC.scale, ADC.adc1-ADC.adc2))
+        ADC.fwrite('{:11.3f}\t{:11.3f}\t{:11.3f}\t{:11.3f}\t{:13.4f}\t{:6.0f}'.format(ADC.u1, ADC.u2, ADC.u3, ADC.u4, ADC.du*ADC.scale, ADC.adc1-ADC.adc2))
         ADC.writeraw()
         if ADC.checkscreen():
             print('{} {:11.3f} {:11.3f} {:11.3f} {:11.3f} {:13.4f}{:6.0f} {:13.5f}'.format(ADC.ru, ADC.u1m, ADC.u2m, ADC.u3m, ADC.u4, ADC.avdu*ADC.scale, ADC.adc1, ADC.rms*ADC.scale))
@@ -297,7 +300,7 @@ class ADC:
             print('{:4d} '.format(da[n]), end = '')
             das = das + hex(da[n])
         print()
-        ADC.f.write(das)
+        ADC.fwrite(das)
         ADC.writeraw()
 
     def keypress(key):
@@ -341,10 +344,10 @@ def main():                     # main program
     kom = input('Kommentar ')
         
     with open(fn, 'w') as ADC.f:
-        ADC.f.write('# ')
+        ADC.fwrite('# ')
         ADC.writetime(ADC.f)
-        ADC.f.write('# {}\n'.format(fn))
-        ADC.f.write('# {}\n'.format(kom))
+        ADC.fwrite('# {}\n'.format(fn))
+        ADC.fwrite('# {}\n'.format(kom))
         
         if fn != 't':
             with open('log_kom.txt', 'a') as ADC.fkom:  # extra log file
